@@ -64,11 +64,75 @@
                             <textarea id="textValue" rows="4" placeholder="Enter your text here..." class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3 border"></textarea>
                         </div>
 
-                        <div id="fileInput" class="hidden text-center border-2 border-dashed border-gray-300 rounded-lg p-8">
-                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
-                            <p class="text-gray-500">Upload your PDF or Image</p>
-                            <p class="text-xs text-red-500 mt-2">*Requires server backend. For demo, entering a URL generates the code.</p>
-                            <input type="url" id="fileUrlValue" placeholder="Paste file URL here for demo" class="mt-4 w-full border-gray-300 rounded-lg shadow-sm p-2 border">
+                        <div id="fileInput" class="hidden">
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition relative" id="dropZone">
+                                
+                                <div id="uploadText">
+                                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
+                                    <p class="text-gray-600 font-medium">Click to upload your PDF</p>
+                                    <p class="text-xs text-gray-400 mt-1">Max 100MB • Powered by File.io</p>
+                                </div>
+
+                                <div id="uploadLoading" class="hidden">
+                                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-600 mb-3"></i>
+                                    <p class="text-sm text-gray-600">Uploading & Generating Link...</p>
+                                </div>
+
+                                <div id="uploadSuccess" class="hidden">
+                                    <i class="fa-solid fa-check-circle text-4xl text-green-500 mb-3"></i>
+                                    <p class="text-sm text-gray-800 font-bold">File Uploaded!</p>
+                                    <p class="text-xs text-gray-500 break-all mt-1" id="finalUrlDisplay"></p>
+                                </div>
+
+                                <input type="file" id="pdfFile" accept="application/pdf, image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div id="emailInput" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fa-solid fa-envelope text-gray-400"></i>
+                                    </div>
+                                    <input type="email" id="emailAddr" class="pl-10 w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="user@example.com">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                                <input type="text" id="emailSub" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="Project Inquiry">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                                <textarea id="emailBody" rows="3" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="Hello, I would like to..."></textarea>
+                            </div>
+                        </div>
+
+                        <div id="wifiInput" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Network Name (SSID)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fa-solid fa-wifi text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="wifiSSID" class="pl-10 w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="MyHomeWiFi">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                    <input type="text" id="wifiPass" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="Password123">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
+                                    <select id="wifiType" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500 bg-white">
+                                        <option value="WPA">WPA/WPA2</option>
+                                        <option value="WEP">WEP</option>
+                                        <option value="nopass">No Password</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500"><i class="fa-solid fa-circle-info mr-1"></i> Scanning this will automatically connect devices to your Wi-Fi.</p>
                         </div>
                     </div>
                 </div>
@@ -79,10 +143,11 @@
                         Design & Templates
                     </h2>
 
-                    <div class="flex border-b border-gray-200 mb-4">
-                        <button id="btn-templates" class="tab-btn px-4 py-2 text-indigo-600 border-b-2 border-indigo-600 font-medium" onclick="switchTab('templates')">Templates</button>
+                    <div class="flex border-b border-gray-200 mb-4 overflow-x-auto">
+                        <button id="btn-templates" class="tab-btn px-4 py-2 text-indigo-600 border-b-2 border-indigo-600 font-medium whitespace-nowrap" onclick="switchTab('templates')">Templates</button>
                         <button id="btn-colors" class="tab-btn px-4 py-2 text-gray-500 hover:text-indigo-600" onclick="switchTab('colors')">Colors</button>
                         <button id="btn-shapes" class="tab-btn px-4 py-2 text-gray-500 hover:text-indigo-600" onclick="switchTab('shapes')">Shapes</button>
+                        <button id="btn-logo" class="tab-btn px-4 py-2 text-gray-500 hover:text-indigo-600" onclick="switchTab('logo')">Logo</button>
                     </div>
 
                     <div id="tab-templates" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -127,6 +192,42 @@
                                 <button onclick="setCornerType('dot')" class="p-2 border rounded hover:bg-gray-50">Dot</button>
                                 <button onclick="setCornerType('extra-rounded')" class="p-2 border rounded hover:bg-gray-50">Soft</button>
                             </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-logo" class="hidden space-y-4">
+                        <div id="logoUploadState" class="text-center">
+                            <label for="logoInput" class="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 hover:bg-gray-50 hover:border-indigo-400 transition group">
+                                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">Upload Logo</span>
+                                <span class="text-xs text-gray-400 mt-1">PNG or JPG (Max 2MB)</span>
+                                <input type="file" id="logoInput" accept="image/*" class="hidden">
+                            </label>
+                        </div>
+
+                        <div id="logoPreviewState" class="hidden">
+                            <label class="text-sm text-gray-600 mb-2 block">Current Logo</label>
+                            <div class="flex items-center justify-between border border-gray-200 rounded-xl p-3 bg-gray-50">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden p-1">
+                                        <img id="logoPreviewImg" src="" class="max-w-full max-h-full object-contain">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700">Custom Logo</p>
+                                        <p class="text-xs text-green-600">Applied to QR</p>
+                                    </div>
+                                </div>
+                                <button onclick="removeLogo()" class="text-gray-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center transition" title="Remove Logo">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-100">
+                            <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Logo Size</label>
+                            <input type="range" min="0.1" max="0.5" step="0.05" value="0.4" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="resizeLogo(this.value)">
                         </div>
                     </div>
 
