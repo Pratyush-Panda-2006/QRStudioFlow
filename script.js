@@ -301,3 +301,47 @@ function downloadQR(format) {
     qrCode.update({ width: 300, height: 300 });
 }
 
+// --- Logo Handling Logic ---
+
+// 1. Listen for File Upload
+document.getElementById('logoInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function() {
+        const result = reader.result;
+
+        // Update QR Code
+        currentOptions.image = result;
+        currentOptions.imageOptions = { crossOrigin: "anonymous", margin: 10, imageSize: 0.4 }; // Default size
+        qrCode.update(currentOptions);
+
+        // Update UI: Show Preview, Hide Upload
+        document.getElementById('logoPreviewImg').src = result;
+        document.getElementById('logoUploadState').classList.add('hidden');
+        document.getElementById('logoPreviewState').classList.remove('hidden');
+    }
+    reader.readAsDataURL(file);
+});
+
+// 2. Remove Logo Function
+function removeLogo() {
+    // Clear QR Image
+    currentOptions.image = "";
+    qrCode.update(currentOptions);
+
+    // Reset Input
+    document.getElementById('logoInput').value = "";
+
+    // Reset UI: Show Upload, Hide Preview
+    document.getElementById('logoUploadState').classList.remove('hidden');
+    document.getElementById('logoPreviewState').classList.add('hidden');
+}
+
+// 3. Resize Logo (Optional slider)
+function resizeLogo(val) {
+    if(!currentOptions.image) return; // Do nothing if no logo
+    currentOptions.imageOptions.imageSize = parseFloat(val);
+    qrCode.update(currentOptions);
+}
