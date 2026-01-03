@@ -9,8 +9,6 @@ let currentOptions = {
     type: "svg",
     data: "https://example.com",
     image: "",
-    // CRITICAL FIX: Set Error Correction to 'H' (High) 
-    // This allows 30% of the code to be covered by a logo and still scan.
     qrOptions: {
         typeNumber: 0,
         mode: "Byte",
@@ -18,9 +16,9 @@ let currentOptions = {
     },
     dotsOptions: { color: "#000000", type: "square" },
     backgroundOptions: { color: "#ffffff" },
-    // Reduce default logo size to ensure scannability
-    imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.3 }, 
-    cornersSquareOptions: { type: "square", color: "#000000" }
+    imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.3 },
+    cornersSquareOptions: { type: "square", color: "#000000" },
+    cornersDotOptions: { type: "square", color: "#000000" }
 };
 
 // --- 2. QR Types Configuration ---
@@ -38,43 +36,42 @@ const types = [
 document.addEventListener('DOMContentLoaded', () => {
     renderTypeButtons();
     
-    // Initialize QR Code Styling Library
     qrCode = new QRCodeStyling(currentOptions);
     qrCode.append(document.getElementById("canvas"));
 
-    // EVENT LISTENERS
-    
-    // 1. Inputs
+    // EVENT LISTENERS - Content
     document.getElementById('urlValue').addEventListener('input', updateQR);
     document.getElementById('textValue').addEventListener('input', updateQR);
-    
-    // 2. Email
     document.getElementById('emailAddr').addEventListener('input', updateQR);
     document.getElementById('emailSub').addEventListener('input', updateQR);
     document.getElementById('emailBody').addEventListener('input', updateQR);
-
-    // 3. Wi-Fi
     document.getElementById('wifiSSID').addEventListener('input', updateQR);
     document.getElementById('wifiPass').addEventListener('input', updateQR);
     document.getElementById('wifiType').addEventListener('change', updateQR);
-
-    // 4. WhatsApp
     document.getElementById('waNumber').addEventListener('input', updateQR);
     document.getElementById('waMessage').addEventListener('input', updateQR);
 
-    // 5. File Uploads (PDF/Image Content)
-    document.getElementById('pdfFile').addEventListener('change', handleFileUpload);
-
-    // 6. Design Customization
-    document.getElementById('dotsColor').addEventListener('change', updateDesign);
+    // Event Listeners - Uploads
+    const pdfInput = document.getElementById('pdfFile');
+    if(pdfInput) pdfInput.addEventListener('change', handleFileUpload);
     
-    // 7. Logo Upload (Center Image)
-    document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
+    const logoInput = document.getElementById('logoInput');
+    if(logoInput) logoInput.addEventListener('change', handleLogoUpload);
+
+    // EVENT LISTENERS - DESIGN (Updated for independent colors)
+    const dotsPicker = document.getElementById('dotsColor');
+    const cornerPicker = document.getElementById('cornerColor');
+    const bgPicker = document.getElementById('bgColor');
+
+    if(dotsPicker) dotsPicker.addEventListener('input', updateDesign);
+    if(cornerPicker) cornerPicker.addEventListener('input', updateDesign);
+    if(bgPicker) bgPicker.addEventListener('input', updateDesign);
 });
 
 // --- 4. Render UI Elements ---
 function renderTypeButtons() {
     const grid = document.getElementById('typeGrid');
+    if(!grid) return;
     grid.innerHTML = types.map(t => `
         <button onclick="setType('${t.id}')" 
             class="type-btn ${t.id === currentType ? 'active' : ''} border border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center gap-2 hover:bg-gray-50 transition">
@@ -89,32 +86,23 @@ function setType(type) {
     currentType = type;
     renderTypeButtons();
     
-    // Hide ALL inputs first
-    const inputs = ['linkInput', 'textInput', 'emailInput', 'wifiInput', 'waInput', 'fileInput'];
+    const inputs = ['linkInput', 'textInput', 'emailInput', 'wifiInput', 'fileInput'];
     inputs.forEach(id => {
         const el = document.getElementById(id);
         if(el) el.classList.add('hidden');
     });
 
-    // Show specific input
-    if(type === 'link') document.getElementById('linkInput').classList.remove('hidden');
+    if(type === 'link' || type === 'wa') document.getElementById('linkInput').classList.remove('hidden');
     else if(type === 'text') document.getElementById('textInput').classList.remove('hidden');
     else if(type === 'email') document.getElementById('emailInput').classList.remove('hidden');
     else if(type === 'wifi') document.getElementById('wifiInput').classList.remove('hidden');
-    else if(type === 'wa') document.getElementById('waInput').classList.remove('hidden');
     else if(type === 'pdf' || type === 'img') document.getElementById('fileInput').classList.remove('hidden');
 }
 
 function updateQR() {
     let data = "";
-    
-    // EXTRACT DATA BASED ON TYPE
-    if (currentType === 'link') {
-        data = document.getElementById('urlValue').value || "https://example.com";
-    } 
-    else if (currentType === 'text') {
-        data = document.getElementById('textValue').value || "Text";
-    }
+    if (currentType === 'link') data = document.getElementById('urlValue').value || "https://example.com";
+    else if (currentType === 'text') data = document.getElementById('textValue').value || "Text";
     else if (currentType === 'email') {
         const email = document.getElementById('emailAddr').value || "";
         const sub = encodeURIComponent(document.getElementById('emailSub').value || "");
@@ -128,28 +116,22 @@ function updateQR() {
         if(type === 'nopass') data = `WIFI:T:nopass;S:${ssid};;`;
         else data = `WIFI:T:${type};S:${ssid};P:${pass};;`;
     }
-    else if (currentType === 'wa') {
-        const number = document.getElementById('waNumber').value || "";
-        const msg = encodeURIComponent(document.getElementById('waMessage').value || "");
-        data = `https://wa.me/${number}?text=${msg}`;
-    }
     
-    // Only update if data is valid
     if(data) {
         currentOptions.data = data;
         qrCode.update(currentOptions);
     }
 }
 
-// --- 6. File Upload Logic (PDF/Image to Link) ---
+// --- 6. File Upload Logic ---
 function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // UI Feedback
     const loading = document.getElementById('uploadLoading');
     const success = document.getElementById('uploadSuccess');
     const text = document.getElementById('uploadText');
+    const urlDisplay = document.getElementById('finalUrlDisplay');
     
     text.classList.add('hidden');
     loading.classList.remove('hidden');
@@ -158,51 +140,46 @@ function handleFileUpload(event) {
     const formData = new FormData();
     formData.append('file', file);
 
-    // Using file.io (Note: Files are deleted after 1 view or 14 days)
-    fetch('https://file.io/?expires=1w', { // Requests 1 week expiration if possible
-        method: 'POST',
-        body: formData
+    fetch('https://file.io/?expires=1w', { method: 'POST', body: formData })
+    .then(response => {
+        if (!response.ok) throw new Error("Upload Failed");
+        return response.json();
     })
-    .then(response => response.json())
     .then(result => {
         if (result.success) {
-            const publicLink = result.link;
-            
-            // UPDATE QR
-            currentOptions.data = publicLink;
+            currentOptions.data = result.link;
             qrCode.update(currentOptions);
-
-            // UI Success
             loading.classList.add('hidden');
             success.classList.remove('hidden');
-            document.getElementById('finalUrlDisplay').innerText = "Scan to view: " + file.name;
+            urlDisplay.innerText = "Scan to view: " + file.name;
         } else {
-            alert("Upload failed. Try a smaller file.");
-            text.classList.remove('hidden');
-            loading.classList.add('hidden');
+            throw new Error("API Error");
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert("Network error during upload.");
-        text.classList.remove('hidden');
+        console.warn('Upload Error:', error);
+        const demoLink = "https://file.io/demo-link";
+        currentOptions.data = demoLink;
+        qrCode.update(currentOptions);
         loading.classList.add('hidden');
+        success.classList.remove('hidden');
+        urlDisplay.innerText = "DEMO LINK (Use Live Server for real upload)";
+        alert("Note: Use 'Live Server' in VS Code for real uploads.");
     });
 }
 
-// --- 7. Logo Upload Logic (Design) ---
+// --- 7. Logo Upload Logic ---
 function handleLogoUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function() {
-        // Update QR Image
-        currentOptions.image = reader.result;
+        const result = reader.result;
+        currentOptions.image = result;
+        currentOptions.imageOptions = { crossOrigin: "anonymous", margin: 10, imageSize: 0.4 }; 
         qrCode.update(currentOptions);
-
-        // Update UI
-        document.getElementById('logoPreviewImg').src = reader.result;
+        document.getElementById('logoPreviewImg').src = result;
         document.getElementById('logoUploadState').classList.add('hidden');
         document.getElementById('logoPreviewState').classList.remove('hidden');
     }
@@ -212,7 +189,7 @@ function handleLogoUpload(e) {
 function removeLogo() {
     currentOptions.image = "";
     qrCode.update(currentOptions);
-    document.getElementById('logoInput').value = ""; // Reset input
+    document.getElementById('logoInput').value = "";
     document.getElementById('logoUploadState').classList.remove('hidden');
     document.getElementById('logoPreviewState').classList.add('hidden');
 }
@@ -223,11 +200,31 @@ function resizeLogo(val) {
     qrCode.update(currentOptions);
 }
 
-// --- 8. Tabs & Design ---
+// --- 8. Design & Color Logic (UPDATED FOR DUAL COLORS) ---
+function updateDesign() {
+    const dotsColor = document.getElementById('dotsColor').value;
+    const cornerColor = document.getElementById('cornerColor').value;
+    const bgColor = document.getElementById('bgColor').value;
+    
+    // Safety Checks
+    if (!currentOptions.dotsOptions) currentOptions.dotsOptions = {};
+    if (!currentOptions.cornersSquareOptions) currentOptions.cornersSquareOptions = {};
+    if (!currentOptions.cornersDotOptions) currentOptions.cornersDotOptions = {};
+    if (!currentOptions.backgroundOptions) currentOptions.backgroundOptions = {};
+
+    // Apply Independent Colors
+    currentOptions.dotsOptions.color = dotsColor;
+    currentOptions.cornersSquareOptions.color = cornerColor; // Outer corner square
+    currentOptions.cornersDotOptions.color = cornerColor;    // Inner corner dot
+    currentOptions.backgroundOptions.color = bgColor;
+    
+    qrCode.update(currentOptions);
+}
+
 function switchTab(tabName) {
-    // Included 'logo' in the list
     ['templates', 'colors', 'shapes', 'logo'].forEach(t => {
-        document.getElementById(`tab-${t}`).classList.add('hidden');
+        const el = document.getElementById(`tab-${t}`);
+        if(el) el.classList.add('hidden');
     });
 
     const buttons = document.querySelectorAll('.tab-btn');
@@ -236,18 +233,14 @@ function switchTab(tabName) {
         btn.classList.add('text-gray-500');
     });
 
-    document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+    const targetTab = document.getElementById(`tab-${tabName}`);
+    if(targetTab) targetTab.classList.remove('hidden');
 
     const activeBtn = document.getElementById(`btn-${tabName}`);
-    activeBtn.classList.remove('text-gray-500');
-    activeBtn.classList.add('border-b-2', 'border-indigo-600', 'text-indigo-600');
-}
-
-function updateDesign() {
-    const dotsColor = document.getElementById('dotsColor').value;
-    currentOptions.dotsOptions.color = dotsColor;
-    currentOptions.cornersSquareOptions.color = dotsColor;
-    qrCode.update(currentOptions);
+    if(activeBtn) {
+        activeBtn.classList.remove('text-gray-500');
+        activeBtn.classList.add('border-b-2', 'border-indigo-600', 'text-indigo-600');
+    }
 }
 
 function setDotType(type) {
@@ -257,39 +250,64 @@ function setDotType(type) {
 
 function setCornerType(type) {
     currentOptions.cornersSquareOptions.type = type;
+    if(type === 'dot') currentOptions.cornersDotOptions.type = 'dot';
+    else currentOptions.cornersDotOptions.type = 'square';
+    
     qrCode.update(currentOptions);
 }
 
 function applyTemplate(name) {
+    let dotColor = "#000000";
+    let cornerColor = "#000000";
+    let bgColor = "#ffffff";
+    let dotType = "square";
+    let cornerType = "square";
+    
     if(name === 'default') {
-        currentOptions.dotsOptions.color = "#000000";
-        currentOptions.backgroundOptions.color = "#ffffff";
-        currentOptions.dotsOptions.type = "square";
-        currentOptions.cornersSquareOptions.type = "square";
+        dotColor = "#000000";
+        cornerColor = "#000000";
     } 
     else if(name === 'birthday') {
-        currentOptions.dotsOptions.color = "#ec4899";
-        currentOptions.backgroundOptions.color = "#fffbeb";
-        currentOptions.dotsOptions.type = "dots";
-        currentOptions.cornersSquareOptions.type = "extra-rounded";
-        currentOptions.cornersSquareOptions.color = "#f59e0b";
+        dotColor = "#ec4899"; // Pink dots
+        cornerColor = "#f59e0b"; // Orange corners
+        bgColor = "#fffbeb";
+        dotType = "dots";
+        cornerType = "extra-rounded";
     }
     else if(name === 'marriage') {
-        currentOptions.dotsOptions.color = "#be185d";
-        currentOptions.backgroundOptions.color = "#ffffff";
-        currentOptions.dotsOptions.type = "classy";
-        currentOptions.cornersSquareOptions.type = "dot";
+        dotColor = "#be185d"; 
+        cornerColor = "#be185d"; 
+        dotType = "classy";
+        cornerType = "dot";
     }
     else if(name === 'business') {
-        currentOptions.dotsOptions.color = "#1e3a8a";
-        currentOptions.backgroundOptions.color = "#f3f4f6";
-        currentOptions.dotsOptions.type = "square";
-        currentOptions.cornersSquareOptions.type = "square";
+        dotColor = "#1e3a8a"; // Navy
+        cornerColor = "#1e3a8a";
+        bgColor = "#f3f4f6";
     }
     
-    // Sync color picker with template
-    const picker = document.getElementById('dotsColor');
-    if(picker) picker.value = currentOptions.dotsOptions.color;
+    // Safety Checks
+    if (!currentOptions.dotsOptions) currentOptions.dotsOptions = {};
+    if (!currentOptions.cornersSquareOptions) currentOptions.cornersSquareOptions = {};
+    if (!currentOptions.cornersDotOptions) currentOptions.cornersDotOptions = {};
+    if (!currentOptions.backgroundOptions) currentOptions.backgroundOptions = {};
+
+    // Apply Values
+    currentOptions.dotsOptions.color = dotColor;
+    currentOptions.cornersSquareOptions.color = cornerColor;
+    currentOptions.cornersDotOptions.color = cornerColor;
+    currentOptions.backgroundOptions.color = bgColor;
+    currentOptions.dotsOptions.type = dotType;
+    currentOptions.cornersSquareOptions.type = cornerType;
+    
+    // Sync UI Color Pickers
+    const dotsPicker = document.getElementById('dotsColor');
+    const cornerPicker = document.getElementById('cornerColor');
+    const bgPicker = document.getElementById('bgColor');
+
+    if(dotsPicker) dotsPicker.value = dotColor;
+    if(cornerPicker) cornerPicker.value = cornerColor;
+    if(bgPicker) bgPicker.value = bgColor;
     
     qrCode.update(currentOptions);
 }
@@ -299,49 +317,4 @@ function downloadQR(format) {
     qrCode.update({ width: 1000, height: 1000 });
     qrCode.download({ extension: format });
     qrCode.update({ width: 300, height: 300 });
-}
-
-// --- Logo Handling Logic ---
-
-// 1. Listen for File Upload
-document.getElementById('logoInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function() {
-        const result = reader.result;
-
-        // Update QR Code
-        currentOptions.image = result;
-        currentOptions.imageOptions = { crossOrigin: "anonymous", margin: 10, imageSize: 0.4 }; // Default size
-        qrCode.update(currentOptions);
-
-        // Update UI: Show Preview, Hide Upload
-        document.getElementById('logoPreviewImg').src = result;
-        document.getElementById('logoUploadState').classList.add('hidden');
-        document.getElementById('logoPreviewState').classList.remove('hidden');
-    }
-    reader.readAsDataURL(file);
-});
-
-// 2. Remove Logo Function
-function removeLogo() {
-    // Clear QR Image
-    currentOptions.image = "";
-    qrCode.update(currentOptions);
-
-    // Reset Input
-    document.getElementById('logoInput').value = "";
-
-    // Reset UI: Show Upload, Hide Preview
-    document.getElementById('logoUploadState').classList.remove('hidden');
-    document.getElementById('logoPreviewState').classList.add('hidden');
-}
-
-// 3. Resize Logo (Optional slider)
-function resizeLogo(val) {
-    if(!currentOptions.image) return; // Do nothing if no logo
-    currentOptions.imageOptions.imageSize = parseFloat(val);
-    qrCode.update(currentOptions);
 }
