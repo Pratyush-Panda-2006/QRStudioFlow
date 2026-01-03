@@ -7,11 +7,27 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        /* Active Button State */
+        .type-btn.active {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
 </head>
 <body class="text-gray-800">
 
@@ -30,7 +46,7 @@
         
         <div class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Create your perfect QR Code</h1>
-            <p class="text-lg text-gray-600">Generate and customize QR codes for links, text, and more.</p>
+            <p class="text-lg text-gray-600">Generate and customize QR codes for links, text, PDF, and more.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -38,247 +54,354 @@
             <div class="lg:col-span-7 space-y-6">
                 
                 <div class="bg-white rounded-2xl shadow-lg p-6">
-                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <span class="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
-                        Choose Content Type
-                    </h2>
-                    
-                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3" id="typeGrid">
-                        </div>
+                    <h2 class="text-lg font-semibold mb-4 text-indigo-900">1. Content Type</h2>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3" id="typeGrid"></div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-lg p-6">
-                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <span class="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
-                        Enter Content
-                    </h2>
+                    <h2 class="text-lg font-semibold mb-4 text-indigo-900">2. Enter Content</h2>
                     
                     <div id="inputContainer">
                         <div id="linkInput">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
-                            <input type="url" id="urlValue" placeholder="https://example.com" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3 border">
+                            <label class="block text-sm font-medium mb-1">Website URL</label>
+                            <input type="url" id="urlValue" placeholder="https://example.com" class="w-full border-gray-300 rounded-lg p-3 border">
                         </div>
                         
                         <div id="textInput" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Your Text</label>
-                            <textarea id="textValue" rows="4" placeholder="Enter your text here..." class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 p-3 border"></textarea>
+                            <label class="block text-sm font-medium mb-1">Text</label>
+                            <textarea id="textValue" rows="4" placeholder="Enter text..." class="w-full border-gray-300 rounded-lg p-3 border"></textarea>
+                        </div>
+
+                        <div id="emailInput" class="hidden space-y-3">
+                            <input type="email" id="emailAddr" placeholder="Email Address" class="w-full border-gray-300 rounded-lg p-3 border">
+                            <input type="text" id="emailSub" placeholder="Subject" class="w-full border-gray-300 rounded-lg p-3 border">
+                            <textarea id="emailBody" placeholder="Message" class="w-full border-gray-300 rounded-lg p-3 border"></textarea>
+                        </div>
+
+                        <div id="wifiInput" class="hidden space-y-3">
+                            <input type="text" id="wifiSSID" placeholder="Network Name (SSID)" class="w-full border-gray-300 rounded-lg p-3 border">
+                            <input type="text" id="wifiPass" placeholder="Password" class="w-full border-gray-300 rounded-lg p-3 border">
+                            <select id="wifiType" class="w-full border-gray-300 rounded-lg p-3 border bg-white">
+                                <option value="WPA">WPA/WPA2</option>
+                                <option value="nopass">No Password</option>
+                            </select>
+                        </div>
+
+                        <div id="waInput" class="hidden space-y-3">
+                            <input type="tel" id="waNumber" placeholder="Phone (with country code)" class="w-full border-gray-300 rounded-lg p-3 border">
+                            <input type="text" id="waMessage" placeholder="Message" class="w-full border-gray-300 rounded-lg p-3 border">
                         </div>
 
                         <div id="fileInput" class="hidden">
-                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition relative" id="dropZone">
-                                
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 relative">
                                 <div id="uploadText">
-                                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-3"></i>
-                                    <p class="text-gray-600 font-medium">Click to upload your PDF</p>
-                                    <p class="text-xs text-gray-400 mt-1">Max 100MB • Powered by File.io</p>
+                                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-2"></i>
+                                    <p class="text-gray-600">Click to upload PDF or Image</p>
                                 </div>
-
-                                <div id="uploadLoading" class="hidden">
-                                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-indigo-600 mb-3"></i>
-                                    <p class="text-sm text-gray-600">Uploading & Generating Link...</p>
+                                <div id="uploadLoading" class="hidden text-indigo-600 font-bold">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Uploading...
                                 </div>
-
-                                <div id="uploadSuccess" class="hidden">
-                                    <i class="fa-solid fa-check-circle text-4xl text-green-500 mb-3"></i>
-                                    <p class="text-sm text-gray-800 font-bold">File Uploaded!</p>
-                                    <p class="text-xs text-gray-500 break-all mt-1" id="finalUrlDisplay"></p>
+                                <div id="uploadSuccess" class="hidden text-green-600 font-bold">
+                                    <i class="fa-solid fa-check"></i> Success!
                                 </div>
-
-                                <input type="file" id="pdfFile" accept="application/pdf, image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                <p id="finalUrlDisplay" class="text-xs text-gray-400 mt-2"></p>
+                                <input type="file" id="pdfFile" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                             </div>
-                        </div>
-
-                        <div id="emailInput" class="hidden space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fa-solid fa-envelope text-gray-400"></i>
-                                    </div>
-                                    <input type="email" id="emailAddr" class="pl-10 w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="user@example.com">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                                <input type="text" id="emailSub" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="Project Inquiry">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
-                                <textarea id="emailBody" rows="3" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="Hello, I would like to..."></textarea>
-                            </div>
-                        </div>
-
-                        <div id="wifiInput" class="hidden space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Network Name (SSID)</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fa-solid fa-wifi text-gray-400"></i>
-                                    </div>
-                                    <input type="text" id="wifiSSID" class="pl-10 w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="MyHomeWiFi">
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                    <input type="text" id="wifiPass" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500" placeholder="Password123">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Encryption</label>
-                                    <select id="wifiType" class="w-full border-gray-300 rounded-lg p-3 border focus:ring-indigo-500 focus:border-indigo-500 bg-white">
-                                        <option value="WPA">WPA/WPA2</option>
-                                        <option value="WEP">WEP</option>
-                                        <option value="nopass">No Password</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <p class="text-xs text-gray-500"><i class="fa-solid fa-circle-info mr-1"></i> Scanning this will automatically connect devices to your Wi-Fi.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-lg p-6">
-                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <span class="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
-                        Design & Templates
-                    </h2>
-
-                    <div class="flex border-b border-gray-200 mb-4 overflow-x-auto">
-                        <button id="btn-templates" class="tab-btn px-4 py-2 text-indigo-600 border-b-2 border-indigo-600 font-medium whitespace-nowrap" onclick="switchTab('templates')">Templates</button>
-                        <button id="btn-colors" class="tab-btn px-4 py-2 text-gray-500 hover:text-indigo-600" onclick="switchTab('colors')">Colors</button>
-                        <button id="btn-shapes" class="tab-btn px-4 py-2 text-gray-500 hover:text-indigo-600" onclick="switchTab('shapes')">Shapes</button>
-                        <button id="btn-logo" class="tab-btn px-4 py-2 text-gray-500 hover:text-indigo-600" onclick="switchTab('logo')">Logo</button>
+                    <h2 class="text-lg font-semibold mb-4 text-indigo-900">3. Customize Design</h2>
+                    
+                    <div class="flex gap-4 border-b border-gray-200 mb-4 overflow-x-auto pb-2">
+                        <button onclick="switchTab('templates')" id="btn-templates" class="text-indigo-600 font-bold border-b-2 border-indigo-600 pb-2">Templates</button>
+                        <button onclick="switchTab('colors')" id="btn-colors" class="text-gray-500 hover:text-indigo-600 pb-2">Colors</button>
+                        <button onclick="switchTab('logo')" id="btn-logo" class="text-gray-500 hover:text-indigo-600 pb-2">Logo</button>
                     </div>
 
                     <div id="tab-templates" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <button onclick="applyTemplate('default')" class="p-3 border rounded-lg hover:border-indigo-500 text-center">
-                            <div class="w-8 h-8 bg-black mx-auto mb-2 rounded"></div>
-                            <span class="text-xs font-medium">Classic</span>
-                        </button>
-                        <button onclick="applyTemplate('birthday')" class="p-3 border rounded-lg hover:border-indigo-500 text-center">
-                            <div class="w-8 h-8 bg-gradient-to-r from-pink-500 to-yellow-500 mx-auto mb-2 rounded-full"></div>
-                            <span class="text-xs font-medium">Birthday</span>
-                        </button>
-                        <button onclick="applyTemplate('marriage')" class="p-3 border rounded-lg hover:border-indigo-500 text-center">
-                            <div class="w-8 h-8 bg-pink-100 border-2 border-pink-500 mx-auto mb-2 rounded"></div>
-                            <span class="text-xs font-medium">Marriage</span>
-                        </button>
-                        <button onclick="applyTemplate('business')" class="p-3 border rounded-lg hover:border-indigo-500 text-center">
-                            <div class="w-8 h-8 bg-blue-900 mx-auto mb-2 rounded"></div>
-                            <span class="text-xs font-medium">Business</span>
-                        </button>
+                        <button onclick="applyTemplate('default')" class="p-3 border rounded hover:border-indigo-500 text-sm">Classic</button>
+                        <button onclick="applyTemplate('birthday')" class="p-3 border rounded hover:border-indigo-500 text-sm bg-pink-50 text-pink-600">Birthday</button>
+                        <button onclick="applyTemplate('business')" class="p-3 border rounded hover:border-indigo-500 text-sm bg-blue-50 text-blue-900">Business</button>
+                        <button onclick="applyTemplate('marriage')" class="p-3 border rounded hover:border-indigo-500 text-sm bg-red-50 text-red-900">Marriage</button>
                     </div>
 
                     <div id="tab-colors" class="hidden space-y-4">
-                        <div>
-                            <label class="text-sm font-medium text-gray-700 mb-1 block">Dots Color (Data)</label>
-                            <div class="flex items-center gap-3">
-                                <input type="color" id="dotsColor" value="#000000" class="w-12 h-12 rounded-lg cursor-pointer border border-gray-200 p-1">
-                                <span class="text-xs text-gray-500">Change the main pattern color</span>
-                            </div>
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium">Dots Color</label>
+                            <input type="color" id="dotsColor" value="#000000" class="h-10 w-20 rounded cursor-pointer">
                         </div>
-
-                        <div class="pt-3 border-t border-gray-100">
-                            <label class="text-sm font-medium text-gray-700 mb-1 block">Corners Color (Eyes)</label>
-                            <div class="flex items-center gap-3">
-                                <input type="color" id="cornerColor" value="#000000" class="w-12 h-12 rounded-lg cursor-pointer border border-gray-200 p-1">
-                                <span class="text-xs text-gray-500">Change the 3 big corner markers</span>
-                            </div>
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium">Corners Color</label>
+                            <input type="color" id="cornerColor" value="#000000" class="h-10 w-20 rounded cursor-pointer">
                         </div>
-                        
-                        <div class="pt-3 border-t border-gray-100">
-                            <label class="text-sm font-medium text-gray-700 mb-1 block">Background Color</label>
-                            <div class="flex items-center gap-3">
-                                <input type="color" id="bgColor" value="#ffffff" class="w-12 h-12 rounded-lg cursor-pointer border border-gray-200 p-1">
-                                <span class="text-xs text-gray-500">Change background</span>
-                            </div>
+                        <div class="flex justify-between items-center">
+                            <label class="text-sm font-medium">Background</label>
+                            <input type="color" id="bgColor" value="#ffffff" class="h-10 w-20 rounded cursor-pointer">
                         </div>
                     </div>
 
-                    <div id="tab-shapes" class="hidden space-y-4">
-                        <div>
-                            <label class="text-sm text-gray-600 mb-2 block">Dot Style</label>
-                            <div class="flex gap-2">
-                                <button onclick="setDotType('square')" class="p-2 border rounded hover:bg-gray-50">Square</button>
-                                <button onclick="setDotType('dots')" class="p-2 border rounded hover:bg-gray-50">Dots</button>
-                                <button onclick="setDotType('rounded')" class="p-2 border rounded hover:bg-gray-50">Rounded</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-sm text-gray-600 mb-2 block">Corner Square Style</label>
-                            <div class="flex gap-2">
-                                <button onclick="setCornerType('square')" class="p-2 border rounded hover:bg-gray-50">Square</button>
-                                <button onclick="setCornerType('dot')" class="p-2 border rounded hover:bg-gray-50">Dot</button>
-                                <button onclick="setCornerType('extra-rounded')" class="p-2 border rounded hover:bg-gray-50">Soft</button>
-                            </div>
-                        </div>
+                    <div id="tab-logo" class="hidden space-y-4 text-center">
+                        <label class="block w-full border-2 border-dashed border-gray-300 p-4 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <span class="text-sm text-gray-600">Click to Upload Logo</span>
+                            <input type="file" id="logoInput" accept="image/*" class="hidden">
+                        </label>
+                        <button onclick="removeLogo()" class="text-red-500 text-sm underline">Remove Logo</button>
                     </div>
-
-                    <div id="tab-logo" class="hidden space-y-4">
-                        <div id="logoUploadState" class="text-center">
-                            <label for="logoInput" class="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 hover:bg-gray-50 hover:border-indigo-400 transition group">
-                                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition">
-                                    <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
-                                </div>
-                                <span class="text-sm font-medium text-gray-700">Upload Logo</span>
-                                <span class="text-xs text-gray-400 mt-1">PNG or JPG (Max 2MB)</span>
-                                <input type="file" id="logoInput" accept="image/*" class="hidden">
-                            </label>
-                        </div>
-
-                        <div id="logoPreviewState" class="hidden">
-                            <label class="text-sm text-gray-600 mb-2 block">Current Logo</label>
-                            <div class="flex items-center justify-between border border-gray-200 rounded-xl p-3 bg-gray-50">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden p-1">
-                                        <img id="logoPreviewImg" src="" class="max-w-full max-h-full object-contain">
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-700">Custom Logo</p>
-                                        <p class="text-xs text-green-600">Applied to QR</p>
-                                    </div>
-                                </div>
-                                <button onclick="removeLogo()" class="text-gray-400 hover:text-red-500 hover:bg-red-50 w-8 h-8 rounded-full flex items-center justify-center transition" title="Remove Logo">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="pt-4 border-t border-gray-100">
-                            <label class="text-xs text-gray-500 uppercase font-bold mb-2 block">Logo Size</label>
-                            <input type="range" min="0.1" max="0.5" step="0.05" value="0.4" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" oninput="resizeLogo(this.value)">
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
             <div class="lg:col-span-5">
                 <div class="sticky top-24">
-                    <div class="bg-white rounded-2xl shadow-xl p-8 text-center border border-gray-100">
-                        <h3 class="text-xl font-bold text-gray-800 mb-6">QR Preview</h3>
-                        
-                        <div class="flex justify-center mb-8">
-                            <div id="canvas" class="border p-4 rounded-xl bg-white shadow-inner"></div>
+                    <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">Preview</h3>
+                        <div class="flex justify-center mb-6">
+                            <div id="canvas" class="border p-2 rounded bg-white shadow-inner"></div>
                         </div>
-
                         <div class="grid grid-cols-2 gap-4">
-                            <button onclick="downloadQR('png')" class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-download"></i> PNG
-                            </button>
-                            <button onclick="downloadQR('jpeg')" class="bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-file-image"></i> JPEG
-                            </button>
+                            <button onclick="downloadQR('png')" class="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold">Download PNG</button>
+                            <button onclick="downloadQR('jpeg')" class="bg-gray-800 hover:bg-gray-900 text-white py-3 rounded-lg font-bold">Download JPEG</button>
                         </div>
-                        <button onclick="downloadQR('svg')" class="mt-3 w-full border border-gray-300 hover:bg-gray-50 text-gray-700 py-3 rounded-lg font-medium transition">
-                            Download SVG (Vector)
-                        </button>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
-    
-    <script src="script.js"></script>
+
+    <script>
+        let qrCode;
+        let currentType = 'link';
+        
+        // Initial Configuration
+        let options = {
+            width: 300,
+            height: 300,
+            type: "svg",
+            data: "https://example.com",
+            image: "",
+            dotsOptions: { color: "#000000", type: "square" },
+            backgroundOptions: { color: "#ffffff" },
+            imageOptions: { crossOrigin: "anonymous", margin: 5, imageSize: 0.3 },
+            cornersSquareOptions: { type: "square", color: "#000000" },
+            cornersDotOptions: { type: "square", color: "#000000" },
+            qrOptions: { errorCorrectionLevel: 'H' }
+        };
+
+        const types = [
+            { id: 'link', icon: 'fa-solid fa-link', label: 'Link' },
+            { id: 'text', icon: 'fa-solid fa-align-left', label: 'Text' },
+            { id: 'email', icon: 'fa-solid fa-envelope', label: 'Email' },
+            { id: 'pdf', icon: 'fa-solid fa-file-pdf', label: 'PDF' },
+            { id: 'wifi', icon: 'fa-solid fa-wifi', label: 'Wi-Fi' },
+            { id: 'wa', icon: 'fa-brands fa-whatsapp', label: 'WhatsApp' },
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Render Type Buttons
+            const grid = document.getElementById('typeGrid');
+            grid.innerHTML = types.map(t => `
+                <button onclick="setType('${t.id}')" id="btn-${t.id}"
+                    class="type-btn border border-gray-200 rounded-xl p-3 flex flex-col items-center gap-2 hover:bg-gray-50 transition ${t.id === 'link' ? 'active' : ''}">
+                    <i class="${t.icon} text-xl"></i>
+                    <span class="text-xs font-semibold">${t.label}</span>
+                </button>
+            `).join('');
+
+            // 2. Init QR
+            qrCode = new QRCodeStyling(options);
+            qrCode.append(document.getElementById("canvas"));
+
+            // 3. Add Listeners to all inputs
+            const inputs = ['urlValue', 'textValue', 'emailAddr', 'emailSub', 'emailBody', 'wifiSSID', 'wifiPass', 'waNumber', 'waMessage'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.addEventListener('input', updateQR);
+            });
+            
+            // 4. Dropdowns and Files
+            document.getElementById('wifiType').addEventListener('change', updateQR);
+            document.getElementById('pdfFile').addEventListener('change', handleFileUpload);
+            document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
+
+            // 5. Color Listeners (CRITICAL FIX: Use 'input' event)
+            document.getElementById('dotsColor').addEventListener('input', updateDesign);
+            document.getElementById('cornerColor').addEventListener('input', updateDesign);
+            document.getElementById('bgColor').addEventListener('input', updateDesign);
+        });
+
+        function setType(type) {
+            currentType = type;
+            
+            // Update Buttons UI
+            document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`btn-${type}`);
+            if(activeBtn) activeBtn.classList.add('active');
+
+            // Hide all Inputs
+            ['linkInput', 'textInput', 'emailInput', 'wifiInput', 'waInput', 'fileInput'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            // Show Selected Input
+            if(type === 'link') document.getElementById('linkInput').classList.remove('hidden');
+            else if(type === 'text') document.getElementById('textInput').classList.remove('hidden');
+            else if(type === 'email') document.getElementById('emailInput').classList.remove('hidden');
+            else if(type === 'wifi') document.getElementById('wifiInput').classList.remove('hidden');
+            else if(type === 'wa') document.getElementById('waInput').classList.remove('hidden');
+            else if(type === 'pdf') document.getElementById('fileInput').classList.remove('hidden');
+            
+            updateQR();
+        }
+
+        function updateQR() {
+            let data = "";
+            
+            if (currentType === 'link') data = document.getElementById('urlValue').value || "https://example.com";
+            else if (currentType === 'text') data = document.getElementById('textValue').value || "Text";
+            else if (currentType === 'email') {
+                const mail = document.getElementById('emailAddr').value;
+                const sub = document.getElementById('emailSub').value;
+                const body = document.getElementById('emailBody').value;
+                data = `mailto:${mail}?subject=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`;
+            }
+            else if (currentType === 'wifi') {
+                const ssid = document.getElementById('wifiSSID').value;
+                const pass = document.getElementById('wifiPass').value;
+                const t = document.getElementById('wifiType').value;
+                data = `WIFI:T:${t};S:${ssid};P:${pass};;`;
+            }
+            else if (currentType === 'wa') {
+                const num = document.getElementById('waNumber').value;
+                const msg = document.getElementById('waMessage').value;
+                data = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+            }
+
+            if(data) {
+                options.data = data;
+                qrCode.update(options);
+            }
+        }
+
+        // PDF Upload Logic with DEMO FALLBACK
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // UI
+            document.getElementById('uploadText').classList.add('hidden');
+            document.getElementById('uploadLoading').classList.remove('hidden');
+            document.getElementById('uploadSuccess').classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Try Upload
+            fetch('https://file.io/?expires=1w', { method: 'POST', body: formData })
+            .then(res => {
+                if(!res.ok) throw new Error("Upload Failed");
+                return res.json();
+            })
+            .then(data => {
+                if(data.success) {
+                    options.data = data.link;
+                    qrCode.update(options);
+                    finishUpload(file.name);
+                } else {
+                    throw new Error("API Error");
+                }
+            })
+            .catch(err => {
+                console.warn("Upload failed:", err);
+                // FALLBACK FOR GITHUB PAGES (Because File.io blocks CORS often)
+                options.data = "https://example.com/demo-file";
+                qrCode.update(options);
+                
+                finishUpload("Demo File Link (Upload blocked by CORS)");
+                alert("Note: Real file uploads require a backend server. A demo QR was created.");
+            });
+        }
+
+        function finishUpload(name) {
+            document.getElementById('uploadLoading').classList.add('hidden');
+            document.getElementById('uploadSuccess').classList.remove('hidden');
+            document.getElementById('finalUrlDisplay').innerText = "Linked: " + name;
+        }
+
+        // Logo Logic
+        function handleLogoUpload(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    options.image = e.target.result;
+                    qrCode.update(options);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeLogo() {
+            options.image = "";
+            document.getElementById('logoInput').value = "";
+            qrCode.update(options);
+        }
+
+        // Design & Colors
+        function switchTab(tab) {
+            ['templates', 'colors', 'logo'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-${t}`).classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+                document.getElementById(`btn-${t}`).classList.add('text-gray-500');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`btn-${tab}`).classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+        }
+
+        function updateDesign() {
+            // 1. Get Values
+            const dotC = document.getElementById('dotsColor').value;
+            const corC = document.getElementById('cornerColor').value;
+            const bgC = document.getElementById('bgColor').value;
+
+            // 2. Update Options
+            options.dotsOptions.color = dotC;
+            options.cornersSquareOptions.color = corC;
+            options.cornersDotOptions.color = corC;
+            options.backgroundOptions.color = bgC;
+
+            // 3. Render
+            qrCode.update(options);
+        }
+
+        function applyTemplate(name) {
+            let d="#000000", c="#000000", b="#ffffff";
+            let dType = "square", cType = "square";
+
+            if(name === 'birthday') { d="#db2777"; c="#f59e0b"; b="#fdf2f8"; dType="dots"; cType="extra-rounded"; }
+            else if(name === 'business') { d="#1e3a8a"; c="#1e3a8a"; b="#eff6ff"; }
+            else if(name === 'marriage') { d="#be185d"; c="#be185d"; dType="classy"; cType="dot"; }
+
+            // Set Values
+            options.dotsOptions.color = d;
+            options.cornersSquareOptions.color = c;
+            options.cornersDotOptions.color = c;
+            options.backgroundOptions.color = b;
+            options.dotsOptions.type = dType;
+            options.cornersSquareOptions.type = cType;
+
+            // Update UI Pickers
+            document.getElementById('dotsColor').value = d;
+            document.getElementById('cornerColor').value = c;
+            document.getElementById('bgColor').value = b;
+
+            qrCode.update(options);
+        }
+
+        function downloadQR(fmt) {
+            qrCode.download({ extension: fmt });
+        }
+    </script>
 </body>
 </html>
