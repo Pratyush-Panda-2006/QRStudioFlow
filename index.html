@@ -46,7 +46,7 @@
         
         <div class="text-center mb-10">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Create your perfect QR Code</h1>
-            <p class="text-lg text-gray-600">Generate and customize QR codes for links, text, PDF, and more.</p>
+            <p class="text-lg text-gray-600">Generate and customize QR codes for links, text, Wi-Fi, and more.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -91,24 +91,7 @@
                             <input type="tel" id="waNumber" placeholder="Phone (with country code)" class="w-full border-gray-300 rounded-lg p-3 border">
                             <input type="text" id="waMessage" placeholder="Message" class="w-full border-gray-300 rounded-lg p-3 border">
                         </div>
-
-                        <div id="fileInput" class="hidden">
-                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 relative">
-                                <div id="uploadText">
-                                    <i class="fa-solid fa-cloud-arrow-up text-4xl text-indigo-400 mb-2"></i>
-                                    <p class="text-gray-600">Click to upload PDF or Image</p>
-                                </div>
-                                <div id="uploadLoading" class="hidden text-indigo-600 font-bold">
-                                    <i class="fa-solid fa-spinner fa-spin"></i> Uploading...
-                                </div>
-                                <div id="uploadSuccess" class="hidden text-green-600 font-bold">
-                                    <i class="fa-solid fa-check"></i> Success!
-                                </div>
-                                <p id="finalUrlDisplay" class="text-xs text-gray-400 mt-2"></p>
-                                <input type="file" id="pdfFile" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                            </div>
                         </div>
-                    </div>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-lg p-6">
@@ -189,11 +172,11 @@
             qrOptions: { errorCorrectionLevel: 'H' }
         };
 
+        // Removed PDF from this list
         const types = [
             { id: 'link', icon: 'fa-solid fa-link', label: 'Link' },
             { id: 'text', icon: 'fa-solid fa-align-left', label: 'Text' },
             { id: 'email', icon: 'fa-solid fa-envelope', label: 'Email' },
-            { id: 'pdf', icon: 'fa-solid fa-file-pdf', label: 'PDF' },
             { id: 'wifi', icon: 'fa-solid fa-wifi', label: 'Wi-Fi' },
             { id: 'wa', icon: 'fa-brands fa-whatsapp', label: 'WhatsApp' },
         ];
@@ -222,10 +205,10 @@
             
             // 4. Dropdowns and Files
             document.getElementById('wifiType').addEventListener('change', updateQR);
-            document.getElementById('pdfFile').addEventListener('change', handleFileUpload);
+            // Removed PDF file listener
             document.getElementById('logoInput').addEventListener('change', handleLogoUpload);
 
-            // 5. Color Listeners (CRITICAL FIX: Use 'input' event)
+            // 5. Color Listeners
             document.getElementById('dotsColor').addEventListener('input', updateDesign);
             document.getElementById('cornerColor').addEventListener('input', updateDesign);
             document.getElementById('bgColor').addEventListener('input', updateDesign);
@@ -239,8 +222,8 @@
             const activeBtn = document.getElementById(`btn-${type}`);
             if(activeBtn) activeBtn.classList.add('active');
 
-            // Hide all Inputs
-            ['linkInput', 'textInput', 'emailInput', 'wifiInput', 'waInput', 'fileInput'].forEach(id => {
+            // Hide all Inputs (Removed 'fileInput' from this list)
+            ['linkInput', 'textInput', 'emailInput', 'wifiInput', 'waInput'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
 
@@ -250,7 +233,6 @@
             else if(type === 'email') document.getElementById('emailInput').classList.remove('hidden');
             else if(type === 'wifi') document.getElementById('wifiInput').classList.remove('hidden');
             else if(type === 'wa') document.getElementById('waInput').classList.remove('hidden');
-            else if(type === 'pdf') document.getElementById('fileInput').classList.remove('hidden');
             
             updateQR();
         }
@@ -282,51 +264,6 @@
                 options.data = data;
                 qrCode.update(options);
             }
-        }
-
-        // PDF Upload Logic with DEMO FALLBACK
-        function handleFileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // UI
-            document.getElementById('uploadText').classList.add('hidden');
-            document.getElementById('uploadLoading').classList.remove('hidden');
-            document.getElementById('uploadSuccess').classList.add('hidden');
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            // Try Upload
-            fetch('https://file.io/?expires=1w', { method: 'POST', body: formData })
-            .then(res => {
-                if(!res.ok) throw new Error("Upload Failed");
-                return res.json();
-            })
-            .then(data => {
-                if(data.success) {
-                    options.data = data.link;
-                    qrCode.update(options);
-                    finishUpload(file.name);
-                } else {
-                    throw new Error("API Error");
-                }
-            })
-            .catch(err => {
-                console.warn("Upload failed:", err);
-                // FALLBACK FOR GITHUB PAGES (Because File.io blocks CORS often)
-                options.data = "https://example.com/demo-file";
-                qrCode.update(options);
-                
-                finishUpload("Demo File Link (Upload blocked by CORS)");
-                alert("Note: Real file uploads require a backend server. A demo QR was created.");
-            });
-        }
-
-        function finishUpload(name) {
-            document.getElementById('uploadLoading').classList.add('hidden');
-            document.getElementById('uploadSuccess').classList.remove('hidden');
-            document.getElementById('finalUrlDisplay').innerText = "Linked: " + name;
         }
 
         // Logo Logic
